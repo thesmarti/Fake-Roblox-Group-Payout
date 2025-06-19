@@ -11,7 +11,7 @@
 (function () {
   "use strict";
 
-  let fakeGroupFunds = 5425654; // Change group funds
+  let fakeGroupFunds = 1000000; // Change group funds
   let groupFundsElement = null; // Store reference to the element
 
   function formatNumber(num) {
