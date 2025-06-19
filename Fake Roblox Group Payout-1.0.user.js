@@ -11,7 +11,7 @@
 (function () {
   "use strict";
 
-  let fakeGroupFunds = 1000000; // Change group funds
+  let fakeGroupFunds = 5425654; // Change group funds
   let groupFundsElement = null; // Store reference to the element
 
   function formatNumber(num) {
@@ -120,6 +120,14 @@
                 label[for="payout-amount"].Mui-error {
                     color: rgba(255, 255, 255, 0.7) !important;
                 }
+                .fake-funds-error {
+                    color: #ff4444 !important;
+                    font-size: 12px !important;
+                    margin-bottom: 12px !important;
+                    font-family: 'Builder Sans', 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+                    font-weight: 400 !important;
+                    text-align: center !important;
+                }
             `;
       document.head.appendChild(style);
     }
@@ -181,11 +189,47 @@
     console.log("=== END DEBUGGING ===");
   }
 
+  function validatePayoutAmount(modal, amountInput) {
+    const amount = parseInt(amountInput.value) || 0;
+    const isExceedingFunds = amount > fakeGroupFunds;
+
+    // Remove existing error message
+    const existingError = modal.querySelector(".fake-funds-error");
+    if (existingError) {
+      existingError.remove();
+    }
+
+    if (isExceedingFunds && amount > 0) {
+      // Create error message
+      const errorDiv = document.createElement("div");
+      errorDiv.className = "fake-funds-error";
+      errorDiv.textContent = `Payout amount (${formatNumber(
+        amount
+      )}) exceeds available group funds (${formatNumber(fakeGroupFunds)})`;
+
+      // Find the Next button and insert error above it
+      const nextBtn = modal.querySelector('button[type="submit"]') ||
+        modal.querySelector('button:contains("Next")') ||
+        Array.from(modal.querySelectorAll("button")).find((btn) =>
+          btn.textContent.includes("Next")
+        );
+
+      if (nextBtn) {
+        const buttonContainer = nextBtn.parentElement;
+        buttonContainer.insertBefore(errorDiv, nextBtn);
+      }
+
+      return false;
+    }
+
+    return true;
+  }
+
   function processModal() {
     const modal = document.querySelector('[role="dialog"]');
     if (!modal || !modal.textContent.includes("Send to Creators")) return;
 
-    // Hide error message
+    // Hide original error message
     const errorAlert = modal.querySelector(".MuiAlert-filledError");
     if (errorAlert) {
       errorAlert.classList.add("fake-hidden-error");
@@ -199,6 +243,14 @@
       const container = amountInput.closest(".MuiOutlinedInput-root");
       if (container) {
         container.classList.remove("Mui-error");
+      }
+
+      // Add input event listener for real-time validation
+      if (!amountInput.dataset.validationAdded) {
+        amountInput.dataset.validationAdded = "true";
+        amountInput.addEventListener("input", () => {
+          validatePayoutAmount(modal, amountInput);
+        });
       }
 
       // Enable Next button
@@ -218,6 +270,15 @@
 
           nextBtn.addEventListener("click", function (e) {
             let amount = parseInt(amountInput.value) || 0;
+
+            // Validate before processing
+            if (!validatePayoutAmount(modal, amountInput)) {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log("Payout blocked: Amount exceeds group funds");
+              return;
+            }
+
             if (amount > 0) {
               e.preventDefault();
               e.stopPropagation();
