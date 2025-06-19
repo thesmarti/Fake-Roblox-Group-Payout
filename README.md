@@ -1,4 +1,4 @@
-# Fake-Roblox-Group-Payout
+# Fake Roblox Group Funds Payout
 # Update group funds in the userscript
 # Logs in the console
 Fake Roblox group payout interface for scammers and youtubers
