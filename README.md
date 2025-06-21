@@ -1,6 +1,7 @@
 # Fake Roblox Group Funds Payout
 # Update group funds in the userscript
 # Logs in the console
+# Need atleast 1 robux in the group for it to work
 Fake Roblox group payout interface for scammers and youtubers
 <br>
 Updated regularly
